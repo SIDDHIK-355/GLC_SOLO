@@ -1,0 +1,564 @@
+<title>Simple maps — WhatsApp assignment</title>
+<style>
+  :root {
+    --bg: #f2f5f7;
+    --surface: #ffffff;
+    --ink: #1b2733;
+    --muted: #55636f;
+    --line: #d4dce3;
+    --wire: #aab6c2;
+    --you: #1f9d63;
+    --you-strong: #14724a;
+    --you-bg: #e9f6ef;
+    --exists: #55749a;
+    --exists-strong: #3a5878;
+    --exists-bg: #edf2f8;
+    --ext: #8896a4;
+    --ext-strong: #5f6d7b;
+    --ext-bg: #f6f8fa;
+    --act: #c07a14;
+    --act-strong: #8e5a0d;
+    --act-bg: #fbf2e0;
+    --code-bg: #eaeff3;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Cascadia Code", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10161d; --surface: #18212b; --ink: #e6ecf2; --muted: #91a3b5;
+      --line: #2a3644; --wire: #46566a;
+      --you: #3dce8b; --you-strong: #6fe0ac; --you-bg: #132b1f;
+      --exists: #7fa3c7; --exists-strong: #a7c4e0; --exists-bg: #1a2735;
+      --ext: #647483; --ext-strong: #98a8b8; --ext-bg: #161d26;
+      --act: #e0a34e; --act-strong: #edbd7c; --act-bg: #2b2110;
+      --code-bg: #202b37;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10161d; --surface: #18212b; --ink: #e6ecf2; --muted: #91a3b5;
+    --line: #2a3644; --wire: #46566a;
+    --you: #3dce8b; --you-strong: #6fe0ac; --you-bg: #132b1f;
+    --exists: #7fa3c7; --exists-strong: #a7c4e0; --exists-bg: #1a2735;
+    --ext: #647483; --ext-strong: #98a8b8; --ext-bg: #161d26;
+    --act: #e0a34e; --act-strong: #edbd7c; --act-bg: #2b2110;
+    --code-bg: #202b37;
+  }
+  :root[data-theme="light"] {
+    --bg: #f2f5f7; --surface: #ffffff; --ink: #1b2733; --muted: #55636f;
+    --line: #d4dce3; --wire: #aab6c2;
+    --you: #1f9d63; --you-strong: #14724a; --you-bg: #e9f6ef;
+    --exists: #55749a; --exists-strong: #3a5878; --exists-bg: #edf2f8;
+    --ext: #8896a4; --ext-strong: #5f6d7b; --ext-bg: #f6f8fa;
+    --act: #c07a14; --act-strong: #8e5a0d; --act-bg: #fbf2e0;
+    --code-bg: #eaeff3;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.62;
+    margin: 0;
+    padding: 40px 20px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 820px; margin: 0 auto; }
+  a { color: var(--exists-strong); }
+  a:focus-visible { outline: 2px solid var(--you); outline-offset: 2px; }
+
+  .word {
+    font-family: var(--mono);
+    font-size: 0.78em;
+    background: var(--code-bg);
+    border-radius: 4px;
+    padding: 1px 6px;
+    white-space: nowrap;
+    color: var(--exists-strong);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(27px, 4.8vw, 38px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+  .lede { color: var(--muted); font-size: 16.5px; max-width: 60ch; margin: 0 0 18px; }
+  .lede strong { color: var(--ink); }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 10px 18px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin-bottom: 46px;
+    font-size: 14px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+  .swatch.you    { background: var(--you-bg);    border: 2px solid var(--you); }
+  .swatch.exists { background: var(--exists-bg); border: 2px solid var(--exists); }
+  .swatch.ext    { background: var(--ext-bg);    border: 2px dashed var(--ext); }
+  .swatch.act    { background: var(--act-bg);    border: 2px solid var(--act); }
+
+  .section { margin-bottom: 64px; }
+  .section-tag {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--you-strong);
+    margin: 0 0 6px;
+  }
+  h2 { font-size: 24px; font-weight: 750; letter-spacing: -0.01em; margin: 0 0 8px; text-wrap: balance; }
+  .section-intro { color: var(--muted); max-width: 62ch; margin: 0 0 26px; font-size: 15.5px; }
+  .section-intro strong { color: var(--ink); }
+
+  .story {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 14px 18px;
+    max-width: 640px;
+    margin: 0 auto 26px;
+    font-size: 15px;
+  }
+  .story b { color: var(--you-strong); }
+
+  /* flow */
+  .flow { display: flex; flex-direction: column; align-items: center; }
+  .node {
+    width: 100%;
+    max-width: 640px;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 17px 15px;
+  }
+  .node.ext    { border: 1.5px dashed var(--ext); background: var(--ext-bg); }
+  .node.exists { border-color: var(--exists); background: var(--exists-bg); }
+  .node.you    { border: 2px solid var(--you); background: var(--you-bg); }
+  .node.act    { border-color: var(--act); background: var(--act-bg); }
+
+  .node-kind {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 4px;
+  }
+  .node.ext    .node-kind { color: var(--ext-strong); }
+  .node.exists .node-kind { color: var(--exists-strong); }
+  .node.you    .node-kind { color: var(--you-strong); }
+  .node.act    .node-kind { color: var(--act-strong); }
+
+  .node-title { font-weight: 700; font-size: 16.5px; margin: 0 0 4px; }
+  .node p { margin: 0; font-size: 14.5px; }
+  .node .simple { margin-top: 2px; }
+  .node .simple b { color: var(--ink); }
+
+  .wire { display: flex; flex-direction: column; align-items: center; padding: 2px 0; }
+  .wire-line { width: 2px; height: 16px; background: var(--wire); }
+  .wire-label {
+    font-size: 13px;
+    color: var(--muted);
+    padding: 3px 10px;
+    text-align: center;
+    max-width: 92%;
+    font-style: italic;
+  }
+  .wire-head {
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid var(--wire);
+  }
+
+  .jobs { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .jobs li { display: flex; gap: 10px; align-items: baseline; font-size: 14.5px; }
+  .job-chip {
+    flex: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--you-strong);
+    border: 1.5px solid var(--you);
+    border-radius: 999px;
+    width: 21px; height: 21px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(3px);
+  }
+  .hero-out {
+    margin: 14px 0 0;
+    padding: 10px 13px;
+    border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    font-size: 14px;
+  }
+
+  /* golden rule */
+  .golden {
+    border: 2px solid var(--you);
+    background: var(--you-bg);
+    border-radius: 8px;
+    padding: 15px 18px;
+    margin: 0 0 28px;
+    font-size: 15px;
+  }
+  .golden .node-kind { color: var(--you-strong); margin-bottom: 5px; }
+  .golden p { margin: 0; }
+
+  /* timeline */
+  .timeline { list-style: none; margin: 0; padding: 0; }
+  .tstep { position: relative; padding: 0 0 30px 56px; }
+  .tstep::before {
+    content: "";
+    position: absolute; left: 19px; top: 40px; bottom: -2px;
+    width: 2px; background: var(--wire);
+  }
+  .tstep:last-child::before { display: none; }
+  .tnum {
+    position: absolute; left: 0; top: 0;
+    width: 40px; height: 40px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-weight: 700; font-size: 15px;
+    background: var(--surface);
+    border: 2px solid var(--exists); color: var(--exists-strong);
+  }
+  .tstep.own-you .tnum { border-color: var(--you); color: var(--you-strong); background: var(--you-bg); }
+  .tstep.own-act .tnum { border-color: var(--act); color: var(--act-strong); background: var(--act-bg); }
+  .towner {
+    font-family: var(--mono);
+    font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 3px;
+  }
+  .tstep.own-you .towner { color: var(--you-strong); }
+  .tstep.own-act .towner { color: var(--act-strong); }
+  .tstep h3 { font-size: 17.5px; font-weight: 700; margin: 0 0 6px; }
+  .tbody { font-size: 15px; margin: 0 0 10px; max-width: 60ch; }
+  .tbody p { margin: 0 0 8px; }
+  .tbody ul { margin: 6px 0 8px; padding-left: 20px; }
+  .tbody li { margin-bottom: 5px; }
+  .tbody .why { color: var(--muted); }
+  .done {
+    display: flex; gap: 8px; align-items: baseline;
+    font-size: 13px; color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 11px;
+    max-width: 560px;
+  }
+  .done b {
+    color: var(--you-strong); font-weight: 700; flex: none;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.07em;
+  }
+
+  /* dictionary */
+  .dict { display: flex; flex-direction: column; }
+  .dict-row {
+    display: grid;
+    grid-template-columns: 170px 1fr;
+    gap: 14px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+    font-size: 14.5px;
+  }
+  .dict-row:first-child { border-top: none; }
+  .dict-term { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--you-strong); padding-top: 2px; }
+  .dict-def { margin: 0; }
+  .dict-def b { color: var(--ink); }
+
+  @media (max-width: 600px) {
+    body { padding: 26px 14px 60px; }
+    .tstep { padding-left: 48px; }
+    .tnum { width: 34px; height: 34px; font-size: 13.5px; }
+    .tstep::before { left: 16px; top: 36px; }
+    .dict-row { grid-template-columns: 1fr; gap: 2px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="page">
+
+  <p class="eyebrow">Simple version · WhatsApp assignment · Session 11</p>
+  <h1>Same maps, simple words</h1>
+  <p class="lede">This is the easy version of the <a href="https://claude.ai/code/artifact/73d29bfa-7334-4e67-9f72-53e77abb2c08">first page</a>. Same two maps, but every heavy word is explained like you are hearing it for the first time. Read this page fully — then the first page will suddenly make sense. All the difficult words are also collected in a <strong>dictionary at the bottom</strong>.</p>
+
+  <div class="legend" role="list" aria-label="Color meaning">
+    <span class="legend-item" role="listitem"><span class="swatch you"></span> Your work</span>
+    <span class="legend-item" role="listitem"><span class="swatch exists"></span> Sir already built it — we only use it</span>
+    <span class="legend-item" role="listitem"><span class="swatch ext"></span> Outside companies (WhatsApp, Meta, Twilio)</span>
+    <span class="legend-item" role="listitem"><span class="swatch act"></span> Accounts / website things only you can do</span>
+  </div>
+
+  <!-- ═══════════ MAP 1 SIMPLE ═══════════ -->
+  <section class="section">
+    <p class="section-tag">Map 1 · easy version</p>
+    <h2>The journey of one message</h2>
+    <p class="section-intro">The whole system is like a <strong>letter that gets answered automatically</strong>. You send a letter, it travels through a few offices, a robot writes a reply, and the reply comes back to you. Follow the boxes from top to bottom.</p>
+
+    <div class="story">
+      <b>The one-line summary:</b> WhatsApp speaks its own language. Sir's program speaks a different, standard language. <b>Your job is to build the translator between them.</b> That translator is called the <span class="word">adapter</span>.
+    </div>
+
+    <div class="story">
+      <b>Who are you chatting with? (read this first!)</b> Not a friend. There are <b>two numbers</b> in this story:
+      <br>① <b>your personal number</b> — you, the human;
+      <br>② <b>the robot's number</b> — a special WhatsApp number you get free from Twilio or Meta. It belongs to no phone — it belongs to <b>your program on your Mac</b>.
+      <br>It's like messaging a shop's customer-care number: you write to the robot's number, and the robot's number answers <b>you</b>. So in this whole map, it is <b>your own phone</b> that rings at the end — no other person is involved.
+    </div>
+
+    <div class="flow">
+
+      <div class="node ext">
+        <p class="node-kind">Outside world</p>
+        <p class="node-title">1 · Your phone</p>
+        <p class="simple">You open WhatsApp and send <b>“hello”</b> — <b>not to a friend</b>, but <b>to the robot's number</b> (the special number from Twilio or Meta). Like writing to a shop's customer-care number. That's it — your part as a normal user is done.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true"><span class="wire-line"></span><span class="wire-label">the message does NOT come straight to your Mac…</span><span class="wire-head"></span></div>
+
+      <div class="node ext">
+        <p class="node-kind">Outside world</p>
+        <p class="node-title">2 · The company's computers (Meta or Twilio)</p>
+        <p class="simple">Your message first goes to big company computers — like a <b>post office</b>. Two different post offices can carry WhatsApp messages: <b>Meta</b> (the owner of WhatsApp) and <b>Twilio</b> (a messaging company). Sir wants your translator to work with <b>both</b>.</p>
+        <p class="simple" style="margin-top:8px;">The post office then <b>forwards the message to your computer</b> — it literally makes an internet call to your address and drops the message there. That forwarding-call is what people call a <span class="word">webhook</span>.</p>
+        <p class="simple" style="margin-top:8px;">Important: every delivery comes with a <b>seal / stamp</b> proving it's really from the post office and nobody changed the letter on the way. That seal is called a <span class="word">signature</span>.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true"><span class="wire-line"></span><span class="wire-head"></span></div>
+
+      <div class="node act">
+        <p class="node-kind">You set this up later (only for the live demo)</p>
+        <p class="node-title">3 · The temporary public address (ngrok)</p>
+        <p class="simple">Problem: your Mac is at home, hidden — the internet cannot find it. A small tool called <span class="word">ngrok</span> rents you a <b>temporary public address</b> and forwards everything from that address to your Mac. Like a PO box that redirects to your house. Not needed while practicing — only when we talk to the real WhatsApp.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true"><span class="wire-line"></span><span class="wire-head"></span></div>
+
+      <div class="node exists">
+        <p class="node-kind">Sir already built it</p>
+        <p class="node-title">4 · The reception desk (the GLC gateway)</p>
+        <p class="simple">On your Mac runs sir's program, the <span class="word">gateway</span> — think of it as the <b>reception desk of an office building</b>. It receives the delivery, but it does <b>not</b> understand WhatsApp language. So it calls the translator — your code — and hands over the unopened parcel.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true"><span class="wire-line"></span><span class="wire-label">“Translator! A parcel for you.”</span><span class="wire-head"></span></div>
+
+      <div class="node you">
+        <p class="node-kind">YOUR WORK — this is the assignment</p>
+        <p class="node-title">5 · The translator (your adapter) — receiving side</p>
+        <p class="simple">One Python file: <span class="word">adapter.py</span>. When a message arrives, it does <b>4 jobs, in this order</b>:</p>
+        <ol class="jobs">
+          <li><span class="job-chip">1</span><span><b>Check the seal.</b> Is the stamp real? If there is no stamp, or the stamp is fake → <b>throw the letter in the bin, silently</b>. Never trust an unsealed letter — a hacker could have sent it.</span></li>
+          <li><span class="job-chip">2</span><span><b>Open and read.</b> Dig into the letter and pull out: who sent it, their name, what they wrote, when. (Computer people call this reading <span class="word">parsing</span>.)</span></li>
+          <li><span class="job-chip">3</span><span><b>Give the sender a badge.</b> Green badge = it's really <b>you</b>, the owner. Yellow = a known, approved person. Red = <b>stranger</b>. This badge is the famous <span class="word">trust level</span> — the single most important safety idea in this class. Later, the system decides what it's allowed to do based on this badge. A stranger can never order it to delete your emails.</span></li>
+          <li><span class="job-chip">4</span><span><b>Ignore strangers shouting in public rooms.</b> If the message came from a public group and the sender is a stranger → drop it quietly.</span></li>
+        </ol>
+        <p class="hero-out">Finally the translator rewrites everything onto <b>one standard office form</b> — same form for WhatsApp, Telegram, Slack, everything. That standard form is called the <span class="word">envelope</span> (in code: <span class="word">ChannelMessage</span>). From here on, nobody inside cares that this came from WhatsApp.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true"><span class="wire-line"></span><span class="wire-label">the standard form travels deeper into the building…</span><span class="wire-head"></span></div>
+
+      <div class="node exists">
+        <p class="node-kind">Sir already built it</p>
+        <p class="node-title">6 · The security desk</p>
+        <p class="simple">Two guards check the form: one counts messages so nobody can flood you with 1000 per minute (<span class="word">rate limit</span>), and one writes <b>every single event into a diary with a pen</b> — pages can never be torn out or erased (<span class="word">audit log</span>). This diary is what you must show in your demo video.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true"><span class="wire-line"></span><span class="wire-head"></span></div>
+
+      <div class="node exists">
+        <p class="node-kind">Sir already built it</p>
+        <p class="node-title">7 · The “brain” — for now, a parrot</p>
+        <p class="simple">Surprise: <b>there is no AI in this assignment.</b> For now the brain is a toy parrot: you say “hello”, it answers <b>“[glc echo] hello”</b>. The real AI brain gets connected in the next sessions. Sir said it clearly: “You're just enabling channels.” Our only job is making the message road work.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true"><span class="wire-line"></span><span class="wire-label">the reply form comes back out…</span><span class="wire-head"></span></div>
+
+      <div class="node you">
+        <p class="node-kind">YOUR WORK — second half of the assignment</p>
+        <p class="node-title">8 · The translator again — sending side</p>
+        <p class="simple">Second function in the same file: <span class="word">send()</span>. It takes the standard reply form and translates it <b>back into WhatsApp language</b> — the exact wording Meta or Twilio demands — and hands it to the post office. If the wording is even slightly wrong, the post office refuses it. (The tests check this exact wording.)</p>
+      </div>
+
+      <div class="wire" aria-hidden="true"><span class="wire-line"></span><span class="wire-head"></span></div>
+
+      <div class="node ext">
+        <p class="node-kind">Outside world</p>
+        <p class="node-title">9 · YOUR phone rings</p>
+        <p class="simple">The reply comes <b>from the robot's number, back into your chat with it</b>. Yes — it is <b>your own phone</b> that rings, because <b>you</b> are the person talking to the robot. No friend, no third person is involved anywhere. (If you message a friend normally, of course their phone rings — but our system never touches those messages. It only handles messages sent to the robot's number.) Full circle. <b>You built boxes 5 and 8. Everything else already exists.</b></p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════ MAP 2 SIMPLE ═══════════ -->
+  <section class="section">
+    <p class="section-tag">Map 2 · easy version</p>
+    <h2>The order of work — first things first</h2>
+    <p class="section-intro">Why this order and not another? One golden rule decides everything:</p>
+
+    <div class="golden">
+      <p class="node-kind">The golden rule</p>
+      <p><b>First practice at home with a PRETEND WhatsApp. Touch the real WhatsApp only at the end.</b> The class code includes a fake post office (a <span class="word">mock</span>) and an automatic checker of <b>7 tests</b> — like a question paper that grades itself instantly. Free, fast, no accounts needed. When all 7 say PASS, only then we go to the real world.</p>
+    </div>
+
+    <ol class="timeline">
+
+      <li class="tstep own-act">
+        <span class="tnum">0</span>
+        <p class="towner">You · do it today, it runs in parallel</p>
+        <h3>Paperwork</h3>
+        <div class="tbody">
+          <ul>
+            <li>On the course website: Assignments → S11 → check you're really in <b>Group WhatsApp</b>.</li>
+            <li>If you're in <b>no</b> group → email <b>admin@theschoolofai.in</b> today (replies can take days).</li>
+            <li>On github.com: press the <b>Fork</b> button on sir's repo. A <span class="word">fork</span> is simply <b>your own copy</b> of the class code, under your name, where you're allowed to change things.</li>
+          </ul>
+          <p class="why">Why now: no code needs this — but step 6 is impossible without it, so we start the slow paperwork early.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>group confirmed + your copy exists on GitHub</span></div>
+      </li>
+
+      <li class="tstep">
+        <span class="tnum">1</span>
+        <p class="towner">Claude · ~15 minutes</p>
+        <h3>Check the bike before repairing it</h3>
+        <div class="tbody">
+          <p>Download the code to your Mac, install it, and run the 7 tests <b>without changing anything</b>. Your classmates' translator is already inside, so all 7 should say PASS.</p>
+          <p class="why">Why first: later, tests will fail <em>because of our changes</em>. We must be sure they weren't already failing before we touched anything.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>all 7 tests say PASS on your Mac</span></div>
+      </li>
+
+      <li class="tstep">
+        <span class="tnum">2</span>
+        <p class="towner">Claude explains → you read</p>
+        <h3>Read the question paper</h3>
+        <div class="tbody">
+          <p>The 7 tests <b>are</b> the exam. Each test = one question: “does your translator stamp the owner's badge correctly?”, “does it refuse fake seals?”, and so on. I write you a guide translating each test into normal words.</p>
+          <p class="why">Why before coding: you can't write good answers without reading the questions.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>you can say in your own words what each of the 7 tests wants</span></div>
+      </li>
+
+      <li class="tstep own-you">
+        <span class="tnum">3</span>
+        <p class="towner">You + Claude · the main work</p>
+        <h3>Delete the answer, write it again ourselves</h3>
+        <div class="tbody">
+          <p>We remove the classmates' translator — all 7 tests turn <b>red (FAIL)</b> — and rebuild it ourselves, one question at a time. Each time a test turns <b>green (PASS)</b>, we save the work under <b>your name</b> (each save is a <span class="word">commit</span>).</p>
+          <ul>
+            <li>3a · Open &amp; read Meta's letters + give badges → tests 1 and 2 turn green</li>
+            <li>3b · Write replies in Meta's exact wording → test 3</li>
+            <li>3c · Don't crash when the line drops; pass on “too many messages” errors → tests 4, 5</li>
+            <li>3d · Ignore strangers in public rooms → test 6</li>
+            <li>3e · Check the seal properly → test 7 (the most important one)</li>
+          </ul>
+          <p class="why">Why this matters so much: sir's rule — <b>“no useful commit from a member → that member gets ZERO.”</b> These commits under your name are your proof of work.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>all 7 green again — but this time it's YOUR code</span></div>
+      </li>
+
+      <li class="tstep own-you">
+        <span class="tnum">4</span>
+        <p class="towner">You + Claude</p>
+        <h3>Teach it the second post office (Twilio)</h3>
+        <div class="tbody">
+          <p>Twilio writes its letters in a different style than Meta and uses a different seal. Same translator, second language. Sir requires both.</p>
+          <p class="why">Why after Meta: the 7 official tests only check Meta — and Twilio is the easiest way to do the live demo in step 5.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>Twilio-style letters also translate correctly</span></div>
+      </li>
+
+      <li class="tstep own-act">
+        <span class="tnum">5</span>
+        <p class="towner">You (free accounts + phone) · Claude (every command)</p>
+        <h3>Real world + record the video</h3>
+        <div class="tbody">
+          <ul>
+            <li>Make a <b>free</b> Twilio trial account, join its WhatsApp “sandbox” (practice playground) from your phone.</li>
+            <li>Start the ngrok address, tell Twilio: “deliver to this address”.</li>
+            <li>Register your own number as the <b>owner</b> (green badge) — this is called <span class="word">pairing</span>.</li>
+            <li>Send “hello” from your phone → “[glc echo] hello” comes back. Then the same with Meta's free test number.</li>
+            <li>Screen-record: phone + terminal + the diary (audit log) → upload to YouTube (unlisted is fine).</li>
+          </ul>
+          <p class="why">Why only now: the code was already proven against the pretend WhatsApp — the real world only tests the wiring, not the logic.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>the round trip is on video, both post offices</span></div>
+      </li>
+
+      <li class="tstep own-you">
+        <span class="tnum">6</span>
+        <p class="towner">Claude writes it · you press the button</p>
+        <h3>Send your gift to the teacher's repo</h3>
+        <div class="tbody">
+          <p>We found a <b>real missing piece</b> in the classmates' merged code: it <b>throws away photos and voice notes</b> — only plain text survives. We add that feature + tests, then send a <span class="word">pull request (PR)</span> — a polite message on GitHub that says: <i>“Dear teacher, please take my improvement into the class repo.”</i> Robots (<span class="word">CI</span>) auto-check it: only our folder touched? tests pass? code style clean? Then sir reviews and merges.</p>
+          <p class="why">Why last: it needs step 3's understanding, step 0's membership, and step 5's video link — and this PR is the commit that officially counts.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>all robot checks on the PR are green</span></div>
+      </li>
+
+      <li class="tstep own-act">
+        <span class="tnum">7</span>
+        <p class="towner">You</p>
+        <h3>Submit on the course website</h3>
+        <div class="tbody">
+          <p>Late is allowed (“submit late → evaluated late”). One caution: sir grades <b>the last</b> submission — so peek at the G21 group chat before re-submitting over what your group already sent.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>submission is visible on the portal</span></div>
+      </li>
+
+    </ol>
+  </section>
+
+  <!-- ═══════════ DICTIONARY ═══════════ -->
+  <section class="section">
+    <p class="section-tag">The heavy words</p>
+    <h2>Small dictionary</h2>
+    <p class="section-intro">Every technical word from both maps, in one line each. Come back here whenever a word feels foreign.</p>
+
+    <div class="dict">
+      <div class="dict-row"><span class="dict-term">API</span><p class="dict-def">A company's <b>service window</b> for programs: your code asks in a fixed format, their computer answers in a fixed format.</p></div>
+      <div class="dict-row"><span class="dict-term">webhook</span><p class="dict-def">The reverse of an API: <b>their</b> computer calls <b>your</b> address when something happens (“you got a message!”). The post office knocking on your door.</p></div>
+      <div class="dict-row"><span class="dict-term">wire format</span><p class="dict-def">The exact shape of a message “on the wire” — WhatsApp's own letter style. Each platform has its own.</p></div>
+      <div class="dict-row"><span class="dict-term">adapter</span><p class="dict-def">Your translator program: WhatsApp language → standard form, and back. Two functions: <b>on_message</b> (receive) and <b>send</b> (reply).</p></div>
+      <div class="dict-row"><span class="dict-term">gateway (GLC)</span><p class="dict-def">Sir's reception-desk program on your Mac. One entrance for all channels. GLC = Gateway for LLMs and Channels.</p></div>
+      <div class="dict-row"><span class="dict-term">envelope / ChannelMessage</span><p class="dict-def">The <b>standard office form</b> every message is rewritten onto — same fields for every platform (sender, text, badge, time…).</p></div>
+      <div class="dict-row"><span class="dict-term">signature / HMAC</span><p class="dict-def">The tamper-proof <b>seal</b> on a delivery. Made from a secret code that only you and the post office know. Fake or missing seal → throw the letter away.</p></div>
+      <div class="dict-row"><span class="dict-term">parsing</span><p class="dict-def">Opening a letter and pulling out the pieces you need (who, what, when) from the raw text.</p></div>
+      <div class="dict-row"><span class="dict-term">trust level</span><p class="dict-def">The sender's <b>badge</b>: <b>owner_paired</b> (it's really you) / <b>user_paired</b> (approved person) / <b>untrusted</b> (stranger). Decides what the system may do.</p></div>
+      <div class="dict-row"><span class="dict-term">pairing</span><p class="dict-def">The one-time ceremony of registering “this phone number = the owner”, using a 6-digit code. Like pairing Bluetooth.</p></div>
+      <div class="dict-row"><span class="dict-term">rate limit</span><p class="dict-def">A guard counting messages: too many too fast → politely refused (error number 429).</p></div>
+      <div class="dict-row"><span class="dict-term">audit log</span><p class="dict-def">The permanent <b>diary in pen</b>: every event written down, nothing can ever be erased. Even the AI can't touch it.</p></div>
+      <div class="dict-row"><span class="dict-term">mock / fake</span><p class="dict-def">A <b>pretend WhatsApp</b> that lives inside the tests — behaves like the real one, but free, instant, and offline. We practice against it.</p></div>
+      <div class="dict-row"><span class="dict-term">test</span><p class="dict-def">A tiny automatic exam question: run your code, check the answer. 7 of them per channel; all must PASS.</p></div>
+      <div class="dict-row"><span class="dict-term">ngrok / tunnel</span><p class="dict-def">A rented temporary <b>public address</b> that forwards internet traffic to your hidden laptop.</p></div>
+      <div class="dict-row"><span class="dict-term">fork</span><p class="dict-def">Your own <b>copy of someone's repo</b> on GitHub, under your name, safe to change.</p></div>
+      <div class="dict-row"><span class="dict-term">commit</span><p class="dict-def">One <b>saved snapshot</b> of your work with your name and a note. Sir counts these to give (or not give) your marks.</p></div>
+      <div class="dict-row"><span class="dict-term">PR (pull request)</span><p class="dict-def">A GitHub message: “please <b>pull</b> my changes into your repo.” Sir reviews it, then merges (accepts) it.</p></div>
+      <div class="dict-row"><span class="dict-term">CI</span><p class="dict-def">Robots on GitHub that auto-check every PR: tests pass? style clean? only your folder touched? All green → sir looks at it.</p></div>
+      <div class="dict-row"><span class="dict-term">stub / echo agent</span><p class="dict-def">A placeholder brain: the <b>parrot</b> that just repeats your message back. The real AI replaces it in later sessions.</p></div>
+      <div class="dict-row"><span class="dict-term">sandbox</span><p class="dict-def">A safe <b>practice playground</b> a company gives you (Twilio's WhatsApp sandbox) — real messages, zero risk, zero cost.</p></div>
+    </div>
+  </section>
+
+</div>

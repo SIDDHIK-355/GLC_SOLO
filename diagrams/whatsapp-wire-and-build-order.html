@@ -1,0 +1,802 @@
+<title>WhatsApp slot — wire &amp; build order</title>
+<style>
+  :root {
+    --bg: #f2f5f7;
+    --surface: #ffffff;
+    --ink: #1b2733;
+    --muted: #5c6b7a;
+    --line: #d4dce3;
+    --wire: #aab6c2;
+
+    --you: #1f9d63;
+    --you-strong: #14724a;
+    --you-bg: #e9f6ef;
+
+    --exists: #55749a;
+    --exists-strong: #3a5878;
+    --exists-bg: #edf2f8;
+
+    --ext: #8896a4;
+    --ext-strong: #5f6d7b;
+    --ext-bg: #f6f8fa;
+
+    --act: #c07a14;
+    --act-strong: #8e5a0d;
+    --act-bg: #fbf2e0;
+
+    --bad: #c2453a;
+    --bad-strong: #93332a;
+    --bad-bg: #faeae8;
+
+    --code-bg: #eaeff3;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Cascadia Code", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10161d;
+      --surface: #18212b;
+      --ink: #e6ecf2;
+      --muted: #8da0b3;
+      --line: #2a3644;
+      --wire: #46566a;
+      --you: #3dce8b;
+      --you-strong: #6fe0ac;
+      --you-bg: #132b1f;
+      --exists: #7fa3c7;
+      --exists-strong: #a7c4e0;
+      --exists-bg: #1a2735;
+      --ext: #647483;
+      --ext-strong: #98a8b8;
+      --ext-bg: #161d26;
+      --act: #e0a34e;
+      --act-strong: #edbd7c;
+      --act-bg: #2b2110;
+      --bad: #e07a70;
+      --bad-strong: #eda49c;
+      --bad-bg: #301713;
+      --code-bg: #202b37;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10161d;
+    --surface: #18212b;
+    --ink: #e6ecf2;
+    --muted: #8da0b3;
+    --line: #2a3644;
+    --wire: #46566a;
+    --you: #3dce8b;
+    --you-strong: #6fe0ac;
+    --you-bg: #132b1f;
+    --exists: #7fa3c7;
+    --exists-strong: #a7c4e0;
+    --exists-bg: #1a2735;
+    --ext: #647483;
+    --ext-strong: #98a8b8;
+    --ext-bg: #161d26;
+    --act: #e0a34e;
+    --act-strong: #edbd7c;
+    --act-bg: #2b2110;
+    --bad: #e07a70;
+    --bad-strong: #eda49c;
+    --bad-bg: #301713;
+    --code-bg: #202b37;
+  }
+  :root[data-theme="light"] {
+    --bg: #f2f5f7;
+    --surface: #ffffff;
+    --ink: #1b2733;
+    --muted: #5c6b7a;
+    --line: #d4dce3;
+    --wire: #aab6c2;
+    --you: #1f9d63;
+    --you-strong: #14724a;
+    --you-bg: #e9f6ef;
+    --exists: #55749a;
+    --exists-strong: #3a5878;
+    --exists-bg: #edf2f8;
+    --ext: #8896a4;
+    --ext-strong: #5f6d7b;
+    --ext-bg: #f6f8fa;
+    --act: #c07a14;
+    --act-strong: #8e5a0d;
+    --act-bg: #fbf2e0;
+    --bad: #c2453a;
+    --bad-strong: #93332a;
+    --bad-bg: #faeae8;
+    --code-bg: #eaeff3;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.55;
+    margin: 0;
+    padding: 40px 20px 72px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 860px; margin: 0 auto; }
+
+  a { color: var(--exists-strong); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--you); outline-offset: 2px; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--code-bg);
+    border-radius: 4px;
+    padding: 1px 5px;
+    white-space: nowrap;
+  }
+
+  /* ── Header ─────────────────────────────────────── */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(26px, 4.6vw, 36px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 62ch;
+    margin: 0 0 26px;
+  }
+  .lede strong { color: var(--ink); }
+
+  /* ── Legend ─────────────────────────────────────── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin-bottom: 44px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+  .swatch.you   { background: var(--you-bg);   border: 2px solid var(--you); }
+  .swatch.exists{ background: var(--exists-bg);border: 2px solid var(--exists); }
+  .swatch.ext   { background: var(--ext-bg);   border: 2px dashed var(--ext); }
+  .swatch.act   { background: var(--act-bg);   border: 2px solid var(--act); }
+
+  /* ── Section headings ───────────────────────────── */
+  .section { margin-bottom: 60px; }
+  .section-tag {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--you-strong);
+    margin: 0 0 6px;
+  }
+  h2 {
+    font-size: 23px;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+  .section-intro { color: var(--muted); max-width: 64ch; margin: 0 0 28px; font-size: 15px; }
+
+  /* ── Flow diagram ───────────────────────────────── */
+  .flow { display: flex; flex-direction: column; align-items: center; }
+  .node {
+    width: 100%;
+    max-width: 640px;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 13px 16px 14px;
+  }
+  .node.ext    { border: 1.5px dashed var(--ext); background: var(--ext-bg); }
+  .node.exists { border-color: var(--exists); background: var(--exists-bg); }
+  .node.you    { border: 2px solid var(--you); background: var(--you-bg); }
+  .node.act    { border-color: var(--act); background: var(--act-bg); }
+
+  .node-kind {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 4px;
+  }
+  .node.ext    .node-kind { color: var(--ext-strong); }
+  .node.exists .node-kind { color: var(--exists-strong); }
+  .node.you    .node-kind { color: var(--you-strong); }
+  .node.act    .node-kind { color: var(--act-strong); }
+
+  .node-title { font-weight: 700; font-size: 15.5px; margin: 0; }
+  .node-sub { color: var(--muted); font-size: 13.5px; margin: 3px 0 0; }
+  .node-sub code { white-space: normal; }
+
+  .wire {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2px 0;
+  }
+  .wire-line { width: 2px; height: 16px; background: var(--wire); }
+  .wire-label {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    padding: 3px 0;
+    text-align: center;
+    max-width: 92%;
+  }
+  .wire-head {
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid var(--wire);
+  }
+
+  /* provider split */
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    max-width: 640px;
+  }
+  .split .node { max-width: none; }
+
+  /* hero adapter node */
+  .node.hero { padding: 16px 18px 18px; }
+  .hero-steps { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+  .hero-steps li { display: flex; gap: 10px; align-items: baseline; font-size: 14px; }
+  .step-chip {
+    flex: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--you-strong);
+    border: 1.5px solid var(--you);
+    border-radius: 999px;
+    width: 20px; height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(3px);
+  }
+  .hero-out {
+    margin: 14px 0 0;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+
+  .flow-note {
+    margin: 26px auto 0;
+    max-width: 640px;
+    font-size: 14px;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+  .flow-note strong { color: var(--ink); }
+
+  /* ── First / later strip ────────────────────────── */
+  .firstlater {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 30px;
+  }
+  .fl-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+  .fl-card h3 {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    margin: 0 0 6px;
+  }
+  .fl-card.first h3 { color: var(--you-strong); }
+  .fl-card.later h3 { color: var(--act-strong); }
+  .fl-card p { margin: 0; color: var(--muted); }
+  .fl-card p strong { color: var(--ink); }
+
+  /* ── Timeline ───────────────────────────────────── */
+  .timeline { list-style: none; margin: 0; padding: 0; }
+  .tstep {
+    position: relative;
+    padding: 0 0 30px 56px;
+  }
+  .tstep::before {
+    content: "";
+    position: absolute;
+    left: 19px; top: 40px; bottom: -2px;
+    width: 2px;
+    background: var(--wire);
+  }
+  .tstep:last-child::before { display: none; }
+  .tnum {
+    position: absolute;
+    left: 0; top: 0;
+    width: 40px; height: 40px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 15px;
+    background: var(--surface);
+    border: 2px solid var(--exists);
+    color: var(--exists-strong);
+  }
+  .tstep.own-you  .tnum { border-color: var(--you);  color: var(--you-strong);  background: var(--you-bg); }
+  .tstep.own-act  .tnum { border-color: var(--act);  color: var(--act-strong);  background: var(--act-bg); }
+
+  .towner {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 3px;
+  }
+  .tstep.own-you .towner { color: var(--you-strong); }
+  .tstep.own-act .towner { color: var(--act-strong); }
+
+  .tstep h3 { font-size: 17px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .tbody { font-size: 14.5px; margin: 0 0 10px; max-width: 62ch; }
+  .tbody p { margin: 0 0 8px; }
+  .tbody ul { margin: 6px 0 8px; padding-left: 20px; }
+  .tbody li { margin-bottom: 4px; }
+  .tbody .why { color: var(--muted); }
+
+  .done {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 11px;
+    max-width: 560px;
+  }
+  .done b {
+    color: var(--you-strong);
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    flex: none;
+  }
+
+  /* substeps table inside step 3 */
+  .subs { width: 100%; border-collapse: collapse; margin: 8px 0 10px; font-size: 13.5px; max-width: 560px; }
+  .subs td { border-top: 1px solid var(--line); padding: 6px 10px 6px 0; vertical-align: top; }
+  .subs tr:first-child td { border-top: none; }
+  .subs .k { font-family: var(--mono); font-size: 12px; color: var(--you-strong); white-space: nowrap; font-weight: 700; }
+  .subs .t { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  /* OpenClaw widget decode */
+  .bf { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .broke, .fix {
+    font-size: 13px;
+    border-radius: 6px;
+    padding: 8px 11px;
+    line-height: 1.5;
+  }
+  .broke { border: 1px solid var(--bad); background: var(--bad-bg); }
+  .fix   { border: 1px solid var(--you); background: var(--you-bg); }
+  .bf-tag {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    font-weight: 700;
+  }
+  .broke .bf-tag { color: var(--bad-strong); }
+  .fix .bf-tag { color: var(--you-strong); }
+
+  .arc { list-style: none; margin: 18px 0 0; padding: 0; max-width: 640px; }
+  .arc li {
+    display: flex;
+    gap: 14px;
+    padding: 9px 0;
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .arc li:first-child { border-top: none; }
+  .arc .d {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    flex: none;
+    width: 72px;
+    padding-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .arc b { font-weight: 700; }
+
+  /* zero-rule note */
+  .zero {
+    border: 1.5px solid var(--act);
+    background: var(--act-bg);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 14.5px;
+    max-width: 640px;
+  }
+  .zero .node-kind { color: var(--act-strong); }
+  .zero p { margin: 4px 0 0; }
+
+  @media (max-width: 600px) {
+    body { padding: 26px 14px 56px; }
+    .split, .firstlater, .bf { grid-template-columns: 1fr; }
+    .tstep { padding-left: 48px; }
+    .tnum { width: 34px; height: 34px; font-size: 13.5px; }
+    .tstep::before { left: 16px; top: 36px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="page">
+
+  <p class="eyebrow">EAG V3 · Session 11 · Group WhatsApp · slot <span style="text-transform:none">whatsapp</span></p>
+  <h1>The wire, and the build order</h1>
+  <p class="lede">Two maps. First: <strong>how one message travels</strong> through GLC v1, so you can see exactly which box is yours. Second: <strong>the order we build in</strong> — what must come first, what can wait, and how we know each step is done.</p>
+
+  <div class="legend" role="list" aria-label="Diagram legend">
+    <span class="legend-item" role="listitem"><span class="swatch you"></span> You build this (your commits)</span>
+    <span class="legend-item" role="listitem"><span class="swatch exists"></span> Already in the repo — instructor built, don't touch</span>
+    <span class="legend-item" role="listitem"><span class="swatch ext"></span> Outside world — phone, Meta, Twilio</span>
+    <span class="legend-item" role="listitem"><span class="swatch act"></span> Accounts &amp; portal — only you can do these</span>
+  </div>
+
+  <!-- ══════════════ SECTION 1 · SIGNAL PATH ══════════════ -->
+  <section class="section">
+    <p class="section-tag">Map 1 · The connection path</p>
+    <h2>How one “hello” travels, end to end</h2>
+    <p class="section-intro">Follow a single message from your phone and back. The whole pipeline already exists — the assignment is the two green boxes: one method in (<code>on_message</code>), one method out (<code>send</code>).</p>
+
+    <div class="flow">
+
+      <div class="node ext">
+        <p class="node-kind">Outside world</p>
+        <p class="node-title">Your phone — WhatsApp app</p>
+        <p class="node-sub">You type “hello” and hit send.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true">
+        <span class="wire-line"></span>
+        <span class="wire-label">WhatsApp delivers it to whichever provider your number is talking to</span>
+        <span class="wire-head"></span>
+      </div>
+
+      <div class="split">
+        <div class="node ext">
+          <p class="node-kind">Provider A</p>
+          <p class="node-title">Meta Cloud API</p>
+          <p class="node-sub">Sends a nested JSON webhook, signed with header <code>X-Hub-Signature-256</code> (HMAC over the raw body).</p>
+        </div>
+        <div class="node ext">
+          <p class="node-kind">Provider B</p>
+          <p class="node-title">Twilio Sandbox</p>
+          <p class="node-sub">Sends a form-encoded webhook, signed with header <code>X-Twilio-Signature</code>. Your slot must support <b>both</b> providers.</p>
+        </div>
+      </div>
+
+      <div class="wire" aria-hidden="true">
+        <span class="wire-line"></span>
+        <span class="wire-label">POST https://&lt;your-tunnel&gt;/v1/channels/whatsapp/webhook</span>
+        <span class="wire-head"></span>
+      </div>
+
+      <div class="node act">
+        <p class="node-kind">You set up (build step 5)</p>
+        <p class="node-title">Tunnel (ngrok) → your Mac, port 8111</p>
+        <p class="node-sub">Meta and Twilio live on the internet; your gateway lives on localhost. The tunnel is the bridge. Only needed for the live demo — all tests run without it.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true">
+        <span class="wire-line"></span>
+        <span class="wire-head"></span>
+      </div>
+
+      <div class="node exists">
+        <p class="node-kind">Already in the repo</p>
+        <p class="node-title">GLC gateway — FastAPI server</p>
+        <p class="node-sub"><code>glc/routes/channels.py</code> receives the POST and hands your adapter a raw parcel: <code>{raw_body, headers}</code>. It doesn't understand WhatsApp — that's your job.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true">
+        <span class="wire-line"></span>
+        <span class="wire-label">raw wire payload in</span>
+        <span class="wire-head"></span>
+      </div>
+
+      <div class="node you hero">
+        <p class="node-kind">You build this — the assignment</p>
+        <p class="node-title">Your adapter · <code>on_message()</code></p>
+        <p class="node-sub"><code>glc/channels/catalogue/whatsapp/adapter.py</code> — translates WhatsApp's dialect into the one shape the system understands. Four jobs, in this order:</p>
+        <ol class="hero-steps">
+          <li><span class="step-chip">1</span><span><strong>Verify the signature.</strong> Recompute the HMAC from the app secret. Unsigned or tampered request → return nothing. No envelope is ever built from an unverified body.</span></li>
+          <li><span class="step-chip">2</span><span><strong>Parse the payload.</strong> Meta: dig out <code>entry[0].changes[0].value.messages[0]</code>. Twilio: read form fields like <code>WaId</code>, <code>Body</code>.</span></li>
+          <li><span class="step-chip">3</span><span><strong>Classify trust.</strong> <code>classify("whatsapp", sender)</code> → <code>owner_paired</code> / <code>user_paired</code> / <code>untrusted</code>. Every message carries this stamp — it's what the policy engine reads later.</span></li>
+          <li><span class="step-chip">4</span><span><strong>Gate public channels.</strong> Stranger in a public context → silently dropped via <code>allowed()</code>.</span></li>
+        </ol>
+        <p class="hero-out">Output: a <code>ChannelMessage</code> — the typed Pydantic envelope. From here on, nothing downstream ever sees WhatsApp-specific JSON again.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true">
+        <span class="wire-line"></span>
+        <span class="wire-label">ChannelMessage (typed envelope)</span>
+        <span class="wire-head"></span>
+      </div>
+
+      <div class="node exists">
+        <p class="node-kind">Already in the repo</p>
+        <p class="node-title">Security rails</p>
+        <p class="node-sub">Allowlist re-check → rate limiter → <strong>append-only audit log</strong> in <code>~/.glc/</code>. Every message leaves a permanent trace — this trace is the “chat-trace overlay” your demo video must show.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true">
+        <span class="wire-line"></span>
+        <span class="wire-head"></span>
+      </div>
+
+      <div class="node exists">
+        <p class="node-kind">Already in the repo</p>
+        <p class="node-title">S11 stub agent</p>
+        <p class="node-sub">Echoes back <code>[glc echo] hello</code>. There is no AI in this assignment — the real agent plugs into this socket from Session 12 onward.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true">
+        <span class="wire-line"></span>
+        <span class="wire-label">ChannelReply (typed envelope)</span>
+        <span class="wire-head"></span>
+      </div>
+
+      <div class="node you">
+        <p class="node-kind">You build this — the assignment</p>
+        <p class="node-title">Your adapter · <code>send()</code></p>
+        <p class="node-sub">The reverse translation: envelope → native wire. Meta Graph body <code>{"messaging_product":"whatsapp", "to":…, "type":"text", "text":{"body":…}}</code>, or Twilio's <code>To</code>/<code>From</code>/<code>Body</code> form.</p>
+      </div>
+
+      <div class="wire" aria-hidden="true">
+        <span class="wire-line"></span>
+        <span class="wire-label">POST to graph.facebook.com / api.twilio.com</span>
+        <span class="wire-head"></span>
+      </div>
+
+      <div class="node ext">
+        <p class="node-kind">Outside world</p>
+        <p class="node-title">Meta / Twilio → your phone</p>
+        <p class="node-sub">The reply lands in the same WhatsApp chat. Round trip complete.</p>
+      </div>
+
+      <p class="flow-note"><strong>How this gets graded:</strong> the 7 official tests in <code>tests/channels/test_whatsapp.py</code> judge only the green boxes, using a fake WhatsApp (<code>whatsapp_mock.py</code>) instead of the real clouds — which is why most of the build needs no accounts at all. Tests 1–2: trust stamping. Test 3: correct outbound shape. Tests 4–5: disconnects and rate limits survive. Test 6: public-channel gate. Test 7 (the big one): the signature check.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════ SECTION 2 · BUILD ORDER ══════════════ -->
+  <section class="section">
+    <p class="section-tag">Map 2 · Build order</p>
+    <h2>What we make first, what comes later</h2>
+    <p class="section-intro">The rule that decides the order: <strong>everything that can run against the built-in fake comes first</strong> — no accounts, no tunnel, no real WhatsApp. Live accounts, demo and PR come after the code is already proven.</p>
+
+    <div class="firstlater">
+      <div class="fl-card first">
+        <h3>First — offline, this machine</h3>
+        <p>Steps 1–4: baseline, understanding, rebuilding the adapter against the <strong>mock</strong>. Verified by the official tests. <strong>Nothing external needed.</strong></p>
+      </div>
+      <div class="fl-card later">
+        <h3>Later — the outside world</h3>
+        <p>Steps 5–7: Twilio/Meta accounts, tunnel, live round trip, demo video, the PR, the portal. Needs <strong>your</strong> accounts and phone.</p>
+      </div>
+    </div>
+
+    <ol class="timeline">
+
+      <li class="tstep own-act">
+        <span class="tnum">0</span>
+        <p class="towner">You · do today, runs in parallel</p>
+        <h3>Unblock the paperwork</h3>
+        <div class="tbody">
+          <ul>
+            <li>Course portal → Assignments → S11: confirm you're in <strong>Group WhatsApp</strong>; peek at the G21 chat to see what the group already submitted.</li>
+            <li>Not in any group? Email <code>admin@theschoolofai.in</code> now.</li>
+            <li>On github.com: <strong>fork</strong> <code>theschoolofai/glc_v1</code> and send me the fork URL.</li>
+          </ul>
+          <p class="why">Why now: no code depends on this — but step 6 (the PR) is impossible without it, and the admin reply may take days.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>group confirmed + fork exists</span></div>
+      </li>
+
+      <li class="tstep">
+        <span class="tnum">1</span>
+        <p class="towner">Claude · ~15 min</p>
+        <h3>Green baseline — build nothing yet</h3>
+        <div class="tbody">
+          <p>Clone the fork, <code>uv sync</code>, run the 7 official tests against the already-merged adapter, boot the gateway on port 8111.</p>
+          <p class="why">Why first: every later step is judged red/green by these tests — that signal is only trustworthy if we start from a known-good 7/7.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>pytest tests/channels/test_whatsapp.py → 7 passed · /v1/status answers</span></div>
+      </li>
+
+      <li class="tstep">
+        <span class="tnum">2</span>
+        <p class="towner">Claude → you · reading day</p>
+        <h3>Understand the contract</h3>
+        <div class="tbody">
+          <p>I write <code>WHATSAPP_SLOT_GUIDE.md</code>: the 4 OpenClaw failures → 6 GLC defenses, the path diagram above traced through real code lines, and the 7 tests translated one by one into plain language.</p>
+          <p class="why">Why before coding: the tests <em>are</em> the spec. Every line we write in step 3 exists to turn one of them green.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>you can say what each of the 7 tests demands</span></div>
+      </li>
+
+      <li class="tstep own-you">
+        <span class="tnum">3</span>
+        <p class="towner">You + Claude · the heart of it</p>
+        <h3>Rebuild the adapter, test by test</h3>
+        <div class="tbody">
+          <p>On branch <code>rebuild/whatsapp-solo</code>: strip <code>adapter.py</code> to the stub — all 7 tests go red — then earn them back in order, one commit each, authored by you:</p>
+          <table class="subs">
+            <tr><td class="k">3a</td><td>Parse Meta webhook → build envelope + stamp trust</td><td class="t">tests 1–2 ✓</td></tr>
+            <tr><td class="k">3b</td><td><code>send()</code> with the exact Graph API body shape</td><td class="t">test 3 ✓</td></tr>
+            <tr><td class="k">3c</td><td>Survive disconnects · propagate 429 rate limits</td><td class="t">tests 4–5 ✓</td></tr>
+            <tr><td class="k">3d</td><td>Drop strangers in public channels</td><td class="t">test 6 ✓</td></tr>
+            <tr><td class="k">3e</td><td>HMAC signature verification — the load-bearing one</td><td class="t">test 7 ✓</td></tr>
+          </table>
+          <p class="why">Why this order: 3a gives us a sender identity — nothing else (trust, gating, replies) exists without a parsed message. Verification (3e) lands last in <em>build</em> order even though it runs first at <em>runtime</em>: it wraps the pipeline the earlier steps already proved.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>7/7 green again · ruff + mypy clean · every commit yours</span></div>
+      </li>
+
+      <li class="tstep own-you">
+        <span class="tnum">4</span>
+        <p class="towner">You + Claude</p>
+        <h3>Add the Twilio path</h3>
+        <div class="tbody">
+          <p>Second dialect, same envelope: parse the form-encoded webhook, validate <code>X-Twilio-Signature</code>, send through Twilio's Messages API.</p>
+          <p class="why">Why after Meta: the official tests only exercise Meta — but the instructor requires both providers, and Twilio is the easiest live demo in step 5.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>slot-local Twilio tests pass alongside the official 7</span></div>
+      </li>
+
+      <li class="tstep own-act">
+        <span class="tnum">5</span>
+        <p class="towner">You (accounts + phone) · Claude (every command)</p>
+        <h3>Go live and record the demo</h3>
+        <div class="tbody">
+          <ul>
+            <li><strong>Twilio sandbox</strong> (free, ~30 min): join from your phone, tunnel to port 8111, point the sandbox webhook at <code>/v1/channels/whatsapp/webhook</code>, pair your number as owner → send “hello” → get <code>[glc echo] hello</code> back.</li>
+            <li><strong>Meta test number</strong> (free, no business verification, up to 5 recipients): same flow through the Graph API.</li>
+            <li>Screen-record phone + terminal + the audit-log trace → upload to YouTube (unlisted is fine).</li>
+          </ul>
+          <p class="why">Why now, not earlier: the code was already proven against the fake in steps 3–4 — going live only debugs the wiring, never the logic.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>round trip on both providers is on video</span></div>
+      </li>
+
+      <li class="tstep own-you">
+        <span class="tnum">6</span>
+        <p class="towner">Claude (code + PR text) · you (push + click)</p>
+        <h3>The useful-commit PR</h3>
+        <div class="tbody">
+          <p>Fix a real gap in the merged adapter: it <strong>silently drops photos and voice notes</strong> (no <code>Attachment</code>, no <code>voice_audio_ref</code>). We add media handling + tests, strictly inside <code>glc/channels/catalogue/whatsapp/**</code>, PR marked <code># Group: WhatsApp</code> / <code># Slot: whatsapp</code> with the demo link.</p>
+          <p class="why">Why last: it needs step 3's understanding, step 0's membership, and step 5's demo link — and it's the commit that officially counts for your score.</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>boundary / slot-tests / scorecard jobs all green on the PR</span></div>
+      </li>
+
+      <li class="tstep own-act">
+        <span class="tnum">7</span>
+        <p class="towner">You</p>
+        <h3>Portal submission</h3>
+        <div class="tbody">
+          <p>Check G21 before re-submitting over your group — the instructor evaluates <em>the last</em> submission. Late is fine: “submit late → evaluated late.”</p>
+        </div>
+        <div class="done"><b>DONE WHEN</b><span>submission visible on the portal</span></div>
+      </li>
+
+    </ol>
+  </section>
+
+  <!-- ══════════════ SECTION 3 · OPENCLAW WIDGET DECODED ══════════════ -->
+  <section class="section">
+    <p class="section-tag">Map 3 · Sir's widget, decoded</p>
+    <h2>“One process, many channels, one viral arc”</h2>
+    <p class="section-intro">The widget from the session page shows <strong>OpenClaw</strong> — the famous personal-agent project GLC learns from. Same layer-cake as Map 1, but the original, insecure version. Read each layer top-to-bottom: what it is, what broke there, and what GLC changed.</p>
+
+    <div class="flow">
+
+      <div class="node exists">
+        <p class="node-kind">Widget layer 1 · “Agent loop”</p>
+        <p class="node-title">LLM (propose) · Tools (dispatch) · Memory (read · write)</p>
+        <p class="node-sub">The brain: the LLM <em>suggests</em> an action, tools <em>execute</em> it, memory remembers between turns. This trio is every personal agent ever built.</p>
+        <div class="bf">
+          <div class="broke"><span class="bf-tag">What broke here</span>Summer Yue's inbox: the “ask before deleting” rule lived <em>inside the LLM's chat context</em>. Context filled up, got compacted, the rule vanished — 200 emails deleted, “STOP” ignored.</div>
+          <div class="fix"><span class="bf-tag">GLC's answer</span>Rules live in <code>policy.yaml</code>, a file <em>outside</em> the model. The LLM proposes; a deterministic policy engine authorises. “YAML does not compact.”</div>
+        </div>
+      </div>
+
+      <div class="wire" aria-hidden="true"><span class="wire-line"></span><span class="wire-head"></span></div>
+
+      <div class="node exists">
+        <p class="node-kind">Widget layer 2 · The hub</p>
+        <p class="node-title">OpenClaw Gateway — single long-running process, WebSocket control plane</p>
+        <p class="node-sub">One process on your computer connecting the brain to everything. GLC v1 is <em>this box, rebuilt</em> — that's why your repo is called a “gateway”.</p>
+        <div class="bf">
+          <div class="broke"><span class="bf-tag">What broke here</span>ClawJacked: the WebSocket control plane trusted anything from localhost. A malicious webpage opened a connection, brute-forced a weak token, registered as a trusted device — and inherited <em>every</em> permission the agent had.</div>
+          <div class="fix"><span class="bf-tag">GLC's answer</span>The WS/control routes demand a per-install token; kill switch is out-of-band (<code>/v1/control/kill</code>); no generic shell endpoint — only named, typed handlers.</div>
+        </div>
+      </div>
+
+      <div class="wire" aria-hidden="true"><span class="wire-line"></span><span class="wire-head"></span></div>
+
+      <div class="node you">
+        <p class="node-kind">Widget layer 3 · Channels (fan-out) — your row!</p>
+        <p class="node-title">WhatsApp · Telegram · Slack · Discord · Signal · Matrix · LINE · iMessage · WebUI · Voice</p>
+        <p class="node-sub">The same row your class is rebuilding as 22 group slots — <strong>WhatsApp, first box in the row, is yours.</strong> This fan-out is why the widget says “one process, many channels”: talk to the same agent from anywhere.</p>
+        <div class="bf">
+          <div class="broke"><span class="bf-tag">What broke here</span>Moltbook: agents posted into a social network whose Supabase DB was left wide open — 1.5M agent API tokens and 35K emails exposed. And the “1.5M agents” were really ~17K humans: the autonomy was theatre.</div>
+          <div class="fix"><span class="bf-tag">GLC's answer</span>Every envelope carries a <code>trust_level</code>; strangers are <code>untrusted</code> before any tool can run; every action lands in an append-only audit log the LLM can never write.</div>
+        </div>
+      </div>
+
+      <div class="wire" aria-hidden="true"><span class="wire-line"></span><span class="wire-head"></span></div>
+
+      <div class="node exists">
+        <p class="node-kind">Widget layer 4 · Skill marketplace</p>
+        <p class="node-title">browser-use · computer-use · calendar · payments · untrusted-skill</p>
+        <p class="node-sub">Loadable bundles that give the agent abilities — like installing apps. Note the widget literally includes a box named <code>untrusted-skill</code>.</p>
+        <div class="bf">
+          <div class="broke"><span class="bf-tag">What broke here</span>Malicious skills: 190 security advisories. A skill bundles instructions + scripts + API endpoints; users read the friendly markdown and missed the part quietly uploading their data to someone's server.</div>
+          <div class="fix"><span class="bf-tag">GLC's answer</span>Skills don't get host execution; every tool call passes the policy engine + trust check first. (Full sandboxing arrives in Session 12 / glc_v2.)</div>
+        </div>
+      </div>
+
+      <p class="flow-note"><strong>The star chart at the bottom of the widget</strong> is the project's life story — each pin is a chapter (click them on the course page):</p>
+
+      <ol class="arc">
+        <li><span class="d">Oct '25</span><span><b>Clawd</b> — Peter Steinberger (PSPDFKit founder) starts a personal-agent experiment. Single user, single machine. <i>(blue pin: product)</i></span></li>
+        <li><span class="d">Nov '25</span><span><b>Public release</b> — 8,000 GitHub stars in weeks; gateway + channels + skills structure attracts contributors.</span></li>
+        <li><span class="d">Dec '25</span><span><b>Viral</b> — Moltbook: agents “form a society”, Reuters covers it, stars rocket toward 100K. <i>(purple pins)</i></span></li>
+        <li><span class="d">Dec–Feb</span><span><b>The four incidents</b> — Moltbook DB exposure, Summer Yue's inbox, ClawJacked, malicious skills. The red pins at the very top of the curve: peak fame and peak failure together.</span></li>
+        <li><span class="d">Feb '26</span><span><b>Acquihire</b> — the founder joins OpenAI; the curve flattens. <i>(orange pin)</i></span></li>
+        <li><span class="d">today</span><span><b>Reference architecture</b> — the design everyone (including GLC) learns from. As the widget's footer says: <i>“the architecture is what carried; the spectacle did not.”</i></span></li>
+      </ol>
+
+      <p class="flow-note"><strong>Why sir shows you this:</strong> your adapter is graded on avoiding these exact mistakes as much as on working — signature checks, trust stamping, and the public-channel gate in Map 1 each answer one red box above.</p>
+    </div>
+  </section>
+
+  <div class="zero">
+    <p class="node-kind">Why rebuild something already merged?</p>
+    <p>Because of the one rule that decides <em>your</em> grade: <strong>“no useful commit from a member → that member gets zero.”</strong> The group's adapter is merged, but none of those commits are yours. Steps 3–4 make you actually understand it; step 6 puts a genuine improvement in the repo under your name.</p>
+  </div>
+
+</div>
