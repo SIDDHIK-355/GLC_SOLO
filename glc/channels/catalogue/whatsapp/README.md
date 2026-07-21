@@ -3,7 +3,7 @@
 Solo build by **SIDDHI** · Session 11, slot `whatsapp` · **proven live on 15 July 2026**
 
 <p align="center">
-  <img src="assets/live_echo_chat.jpeg" alt="Real WhatsApp conversation with the robot — every message echoed back by my adapter running on my Mac" width="360"/>
+  <img src="assets/live_echo_chat.jpeg" alt="Real WhatsApp conversation with the robot — every message echoed back by my adapter running on my Mac" width="300"/>
 </p>
 <p align="center"><i>A real conversation: my phone → Twilio → tunnel → my adapter → back. ~2 seconds per round trip.</i></p>
 
@@ -36,10 +36,32 @@ WhatsApp traffic can ride through two different carriers. This adapter speaks **
 
 ## Architecture
 
+**The one-line analogy:** the adapter is a **translator sitting at the front desk of an office**. WhatsApp speaks its own language; the agent inside speaks GLC's standard language. Every letter that arrives is **checked at the door** before it is let in, and every reply is **repackaged into WhatsApp's exact wording** before it is posted back. You built the two desks marked *YOUR CODE* — everything else already existed.
+
 ```
-WhatsApp ──webhook──►  on_message ──► [disconnect? seal? parse? trust badge? allowlist?] ──► ChannelMessage ──► agent
-                                                                                                                 │
-WhatsApp ◄──send API──  send  ◄──── [build Meta JSON body or Twilio form body] ◄──────────────── ChannelReply ◄──┘
+INBOUND — your message comes in, and is checked at the door
+────────────────────────────────────────────────────────────
+  1  WhatsApp            you message the robot's number
+       │  (webhook)      the post office — Meta or Twilio — forwards it to your Mac
+       ▼
+  2  on_message   ◄── YOUR CODE: the translator, receiving side
+       │   · check the seal  →  fake or missing stamp? binned, silently
+       │   · open & read     →  who sent it, their name, the text      (parse)
+       │   · stamp a badge   →  owner · known person · stranger         (trust level)
+       │   · drop public strangers quietly
+       ▼
+  3  ChannelMessage  ──►  agent
+       the standard "envelope" — from here on, nobody cares it came from WhatsApp
+
+OUTBOUND — the robot's reply is translated back, and posted to you
+────────────────────────────────────────────────────────────
+  4  agent  ──►  ChannelReply        the reply, still on the standard form
+       │
+       ▼
+  5  send   ◄── YOUR CODE: the translator, sending side
+       │   rewrite into WhatsApp's exact wording  (Meta JSON body / Twilio
+       ▼   form body) — one wrong word and the post office rejects it
+  6  post office  ──►  YOUR phone rings          full circle
 ```
 
 `on_message`, in order:
