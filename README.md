@@ -1,1 +1,1 @@
-# GLC_SOLO Projetc
+# GLC_SOLO Project
